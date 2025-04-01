@@ -6,12 +6,14 @@ import pkg_resources
 from pkg_resources import DistributionNotFound
 
 from tequila.objective import Objective, Variable, assign_variable, format_variable_dictionary, QTensor
+from tequila.simulators.simulator_MQP import BackendCircuitAQT, BackendExpectationValueAQT
 from tequila.utils.exceptions import TequilaException, TequilaWarning
 from tequila.simulators.simulator_base import BackendCircuit, BackendExpectationValue
 from tequila.circuit.noise import NoiseModel
 from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
 
-SUPPORTED_BACKENDS = ["qulacs", "qulacs_gpu", "qibo", "qiskit", "qiskit_gpu", "cirq", "pyquil", "symbolic", "qlm"]
+SUPPORTED_BACKENDS = ["qulacs", "qulacs_gpu", "qibo", "qiskit", "qiskit_gpu", "aqt", "cirq", "pyquil", "symbolic",
+                      "qlm"]
 SUPPORTED_NOISE_BACKENDS = ["qiskit", "qiskit_gpu", "cirq", "pyquil"]  # qulacs removed in v.1.9
 BackendTypes = namedtuple('BackendTypes', 'CircType ExpValueType')
 INSTALLED_SIMULATORS = {}
@@ -42,6 +44,17 @@ try:
 except ImportError:
     HAS_QISKIT = False
     HAS_QISKIT_NOISE = False
+
+
+HAS_AQT = True
+try:
+    from qiskit_aqt_provider import AQTProvider
+    from mqp.qiskit_provider import MQPProvider
+    INSTALLED_SIMULATORS["aqt"] = BackendTypes(BackendCircuitAQT, BackendExpectationValueAQT)
+    INSTALLED_SAMPLERS["aqt"] = BackendTypes(BackendCircuitAQT, BackendExpectationValueAQT)
+
+except ImportError:
+    HAS_AQT = False
 
 try:
     pkg_resources.require("qiskit-aer-gpu")
