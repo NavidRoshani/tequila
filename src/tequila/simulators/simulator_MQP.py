@@ -34,8 +34,8 @@ class TequilaAQTException(TequilaQiskitException):
 
 
 class BackendCircuitAQT(BackendCircuitQiskit):
-    token = "yoC3HyYJsgbEVJnNdcvlrfn5hLc7oJqxSTtRSiVnvOhH0hoadBdlKBGfaXtUSoYW" #input lrz token as string
-    STATEVECTOR_DEVICE_NAME = get_aqt_backend(token=token) # todo let the token beaccessed from outside the file
+    token = #input lrz token as string
+    STATEVECTOR_DEVICE_NAME = get_aqt_backend(token="")
 
     def do_simulate(self, variables, initial_state=0, *args, **kwargs) -> QubitWaveFunction:
         """
