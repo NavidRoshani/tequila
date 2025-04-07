@@ -3,6 +3,8 @@ from mqp.qiskit_provider import MQPProvider, MQPBackend
 from qiskit_aqt_provider import AQTProvider
 from qiskit_aqt_provider.aqt_resource import AQTResource
 from qiskit_aqt_provider.primitives import AQTEstimator, AQTSampler
+
+from qiskit.circuit import QuantumCircuit
 import qiskit_aqt_provider
 from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
 from tequila import TequilaException, TequilaWarning
@@ -30,14 +32,15 @@ def get_aqt_backend(token: str = "") -> AQTResource | MQPBackend:
 
 class TequilaAQTException(TequilaQiskitException):
     def __str__(self):
-        return "Error in qiskit backend:" + self.message
+        return "Error in AQT backend:" + self.message
 
 
 class BackendCircuitAQT(BackendCircuitQiskit):
-    token = #input lrz token as string
+    token = ""#input lrz token as string
     STATEVECTOR_DEVICE_NAME = get_aqt_backend(token="")
 
-    def do_simulate(self, variables, initial_state=0, *args, **kwargs) -> QubitWaveFunction:
+    def do_sample(self, circuit: QuantumCircuit, samples: int, read_out_qubits, initial_state=0, *args,
+                  **kwargs) -> QubitWaveFunction: # todo create correct do sample function and test it
         """
         Helper function for performing simulation.
         Parameters
@@ -80,7 +83,7 @@ class BackendCircuitAQT(BackendCircuitQiskit):
         circuit = self.add_measurement(circuit, [0,1,2,3,4,5,6,7])
 
         #circuit.save_statevector() todo why doesnt it work ?????????
-        aqt_shots = 200
+        aqt_shots = 2000
         if "shots" in kwargs:
             aqt_shots = kwargs['shots']
         wavefunction = QubitWaveFunction(len(circuit.qubits))

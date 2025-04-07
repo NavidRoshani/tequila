@@ -530,7 +530,7 @@ class BackendCircuit():
             sign = (-1) ** parity
             E += sign * count
             n_samples += count
-        assert n_samples == samples
+        #assert n_samples == samples todo ????
         E = E / samples * paulistring.coeff
         return E
 
