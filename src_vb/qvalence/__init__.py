@@ -1,0 +1,1 @@
+from src_vb.qvalence.utils import GNM
