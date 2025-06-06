@@ -1,8 +1,10 @@
 import scipy
 import qulacs
-import tequila as tq
+import src.tequila as tq
 import numpy
 import scipy
+from src.tequila.quantumchemistry.qc_base import QuantumChemistryBase
+
 
 import warnings
 warnings.filterwarnings("ignore", category=tq.TequilaWarning)
@@ -29,6 +31,22 @@ def Corr(i,j, label=None):
     In tequila version >= 1.8.4 this is equivalent to mol.UC
     """
     return tq.gates.QubitExcitation(target=[2*i,2*j,2*i+1,2*j+1], angle=(i,j,label))
+
+def SPA(edges,use_units_of_pi=False, label=None, ladder = True):
+    for edge_qubits in edges:
+        previous = edge_qubits[0]
+        if len(edge_qubits) > 1:
+            for q1 in edge_qubits[1:]:
+                c = previous
+                if not ladder:
+                    c = edge_qubits[0]
+                angle = Variable(name=((c, q1), "D", label))
+                if use_units_of_pi:
+                    angle = angle * numpy.pi
+
+
+                U += make_excitation_gate(indices=[(2 * c, 2 * q1), (2 * c + 1, 2 * q1 + 1)], angle=angle)
+                previous = q1
 
 class BraKetQulacs:
     """
@@ -65,6 +83,18 @@ class BraKetQulacs:
         result=result.real
         return result
 
+
+class BraKetOpenfermion(BraKetQulacs):
+    def __init__(self, bra, ket, H):
+        # translate tq -> qulacs
+        E1 = tq.compile(tq.ExpectationValue(U=bra, H=H), backend="opendermion")
+        E2 = tq.compile(tq.ExpectationValue(U=ket, H=H), backend="")
+        # extract qulacs structures
+        self.bra = E1.get_expectationvalues()[0]._U
+        self.ket = E2.get_expectationvalues()[0]._U
+        self.H = E1.get_expectationvalues()[0]._H[0]
+        self.n_qubits = ket.n_qubits
+        self.is_overlap = H.n_qubits == 0
 
 def gem_fast(circuits, H, variables=None, silent=True):
     """

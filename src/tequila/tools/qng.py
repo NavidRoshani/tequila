@@ -1,11 +1,11 @@
-from tequila import TequilaException
-from tequila.hamiltonian import paulis
-from tequila.objective.objective import Objective, ExpectationValueImpl, ExpectationValue
-from tequila.circuit.circuit import QCircuit
-from tequila.simulators.simulator_api import compile_objective
-from tequila.circuit.gradient import __grad_inner
-from tequila.autograd_imports import jax
-from tequila.circuit.compiler import compile_controlled_rotation, compile_power_gate, \
+from src.tequila import TequilaException
+from src.tequila.hamiltonian import paulis
+from src.tequila.objective.objective import Objective, ExpectationValueImpl, ExpectationValue
+from src.tequila.circuit.circuit import QCircuit
+from src.tequila.simulators.simulator_api import compile_objective
+from src.tequila.circuit.gradient import __grad_inner
+from src.tequila.autograd_imports import jax
+from src.tequila.circuit.compiler import compile_controlled_rotation, compile_power_gate, \
     compile_trotterized_gate, compile_controlled_phase, compile_multitarget
 import typing
 import numpy

@@ -1,8 +1,8 @@
-from tequila.simulators.simulator_base import BackendExpectationValue, BackendCircuit
-from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
-from tequila.circuit.circuit import QCircuit
-from tequila.circuit.gates import QGate
-from tequila import BitString
+from src.tequila.simulators.simulator_base import BackendExpectationValue, BackendCircuit
+from src.tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
+from src.tequila.circuit.circuit import QCircuit
+from src.tequila.circuit.gates import QGate
+from src.tequila import BitString
 import numpy
 import copy
 import sympy

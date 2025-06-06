@@ -1,7 +1,7 @@
 from __future__ import annotations
-from tequila.circuit._gates_impl import QGateImpl, assign_variable, list_assignment
-from tequila.utils.exceptions import TequilaException, TequilaWarning
-from tequila.utils.bitstrings import BitNumbering
+from src.tequila.circuit._gates_impl import QGateImpl, assign_variable, list_assignment
+from src.tequila.utils.exceptions import TequilaException, TequilaWarning
+from src.tequila.utils.bitstrings import BitNumbering
 import typing
 import copy
 from collections import defaultdict

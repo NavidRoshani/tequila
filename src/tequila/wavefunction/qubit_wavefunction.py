@@ -12,9 +12,9 @@ import numbers
 
 import sympy
 
-from tequila.utils.bitstrings import BitString, reverse_int_bits
-from tequila import TequilaException, BitNumbering, initialize_bitstring
-from tequila.utils.keymap import KeyMapABC
+from src.tequila.utils.bitstrings import BitString, reverse_int_bits
+from src.tequila import TequilaException, BitNumbering, initialize_bitstring
+from src.tequila.utils.keymap import KeyMapABC
 
 if typing.TYPE_CHECKING:
     # Don't need those structures, just for convenient type hinting

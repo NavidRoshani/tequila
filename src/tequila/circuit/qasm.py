@@ -5,10 +5,10 @@ OPENQASM version 2.0 specification from:
 A. W. Cross, L. S. Bishop, J. A. Smolin, and J. M. Gambetta, e-print arXiv:1707.03429v2 [quant-ph] (2017).
 https://arxiv.org/pdf/1707.03429v2.pdf
 """
-from tequila import TequilaException
-from tequila.circuit import QCircuit
-from tequila.circuit.compiler import CircuitCompiler
-import tequila.circuit.gates as gates
+from src.tequila import TequilaException
+from src.tequila.circuit import QCircuit
+from src.tequila.circuit.compiler import CircuitCompiler
+import src.tequila.circuit.gates as gates
 from numpy import pi
 from typing import Dict
 import typing

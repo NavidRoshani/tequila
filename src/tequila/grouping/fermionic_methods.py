@@ -4,12 +4,12 @@ import os
 from os.path import exists
 from openfermion import FermionOperator, jordan_wigner, get_sparse_operator, expectation, count_qubits
 import pickle
-import tequila.grouping.fermionic_functions as ferm
+import src.tequila.grouping.fermionic_functions as ferm
 from itertools import product
-from tequila.hamiltonian import QubitHamiltonian
+from src.tequila.hamiltonian import QubitHamiltonian
 import scipy as sp
-from tequila.grouping.ev_utils import truncate_wavefunction
-from tequila import TequilaException
+from src.tequila.grouping.ev_utils import truncate_wavefunction
+from src.tequila import TequilaException
 from shutil import rmtree
 import logging
 

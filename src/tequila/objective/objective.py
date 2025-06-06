@@ -1,10 +1,10 @@
 import typing, copy, numbers
-from tequila.grouping.compile_groups import compile_commuting_parts
-from tequila import TequilaException
-from tequila.utils import JoinedTransformation
-from tequila.hamiltonian import paulis
+from src.tequila.grouping.compile_groups import compile_commuting_parts
+from src.tequila import TequilaException
+from src.tequila.utils import JoinedTransformation
+from src.tequila.hamiltonian import paulis
 import numpy as onp
-from tequila.autograd_imports import numpy as numpy
+from src.tequila.autograd_imports import numpy as numpy
 
 import collections
 

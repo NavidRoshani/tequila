@@ -1,11 +1,11 @@
 import scipy, numpy, typing, numbers
-from tequila.objective import Objective
-from tequila.objective.objective import assign_variable, Variable, format_variable_dictionary, format_variable_list
+from src.tequila.objective import Objective
+from src.tequila.objective.objective import assign_variable, Variable, format_variable_dictionary, format_variable_list
 from .optimizer_base import Optimizer, OptimizerResults
 from ._containers import _EvalContainer, _GradContainer, _HessContainer, _QngContainer
-from tequila.utils.exceptions import TequilaException
-from tequila.circuit.noise import NoiseModel
-from tequila.tools.qng import get_qng_combos
+from src.tequila.utils.exceptions import TequilaException
+from src.tequila.circuit.noise import NoiseModel
+from src.tequila.tools.qng import get_qng_combos
 
 from dataclasses import dataclass
 

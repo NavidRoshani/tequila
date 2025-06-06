@@ -1,6 +1,6 @@
-from tequila import TequilaException
-from tequila.quantumchemistry.qc_base import QuantumChemistryBase
-from tequila.quantumchemistry import ParametersQC, NBodyTensor
+from src.tequila import TequilaException
+from src.tequila.quantumchemistry.qc_base import QuantumChemistryBase
+from src.tequila.quantumchemistry import ParametersQC, NBodyTensor
 import pyscf
 
 import numpy, typing

@@ -1,5 +1,5 @@
 import numpy as np
-from tequila.grouping.binary_utils import sorted_insertion_grouping, term_commutes_with_group
+from src.tequila.grouping.binary_utils import sorted_insertion_grouping, term_commutes_with_group
 from copy import deepcopy
 
 class OverlappingAuxiliary:

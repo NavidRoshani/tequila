@@ -1,9 +1,9 @@
-from tequila.utils import TequilaException
-from tequila.circuit.circuit import QCircuit, find_unused_qubit
-from tequila.circuit.gates import H, X, Y, PauliGate
-from tequila.hamiltonian.qubit_hamiltonian import QubitHamiltonian
-from tequila.objective.objective import ExpectationValue, Objective
-from tequila.hamiltonian import paulis
+from src.tequila.utils import TequilaException
+from src.tequila.circuit.circuit import QCircuit, find_unused_qubit
+from src.tequila.circuit.gates import H, X, Y, PauliGate
+from src.tequila.hamiltonian.qubit_hamiltonian import QubitHamiltonian
+from src.tequila.objective.objective import ExpectationValue, Objective
+from src.tequila.hamiltonian import paulis
 
 import numpy as np
 

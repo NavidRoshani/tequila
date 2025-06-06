@@ -5,12 +5,12 @@ from typing import Dict, Union, Hashable
 import pkg_resources
 from pkg_resources import DistributionNotFound
 
-from tequila.objective import Objective, Variable, assign_variable, format_variable_dictionary, QTensor
-from tequila.simulators.simulator_MQP import BackendCircuitAQT, BackendExpectationValueAQT
-from tequila.utils.exceptions import TequilaException, TequilaWarning
-from tequila.simulators.simulator_base import BackendCircuit, BackendExpectationValue
-from tequila.circuit.noise import NoiseModel
-from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
+from src.tequila.objective import Objective, Variable, assign_variable, format_variable_dictionary, QTensor
+from src.tequila.simulators.simulator_MQP import BackendCircuitAQT, BackendExpectationValueAQT
+from src.tequila.utils.exceptions import TequilaException, TequilaWarning
+from src.tequila.simulators.simulator_base import BackendCircuit, BackendExpectationValue
+from src.tequila.circuit.noise import NoiseModel
+from src.tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
 
 SUPPORTED_BACKENDS = ["qulacs", "qulacs_gpu", "qibo", "qiskit", "qiskit_gpu", "aqt", "cirq", "pyquil", "symbolic",
                       "qlm"]
@@ -95,7 +95,7 @@ except ImportError:
 try:
     pkg_resources.require("qulacs")
     import qulacs
-    from tequila.simulators.simulator_qulacs import BackendCircuitQulacs, BackendExpectationValueQulacs
+    from src.tequila.simulators.simulator_qulacs import BackendCircuitQulacs, BackendExpectationValueQulacs
 
     HAS_QULACS = True
     INSTALLED_SIMULATORS["qulacs"] = BackendTypes(CircType=BackendCircuitQulacs,
@@ -110,7 +110,7 @@ except (ImportError, DistributionNotFound):
 try:
     # pkg_resources.require("qulacs-gpu")
     from qulacs import QuantumStateGpu
-    from tequila.simulators.simulator_qulacs_gpu import BackendCircuitQulacsGpu, BackendExpectationValueQulacsGpu
+    from src.tequila.simulators.simulator_qulacs_gpu import BackendCircuitQulacsGpu, BackendExpectationValueQulacsGpu
 
     HAS_QULACS_GPU = True
     INSTALLED_SIMULATORS["qulacs_gpu"] = BackendTypes(CircType=BackendCircuitQulacsGpu,
@@ -126,7 +126,7 @@ except (ImportError, DistributionNotFound):
 HAS_PYQUIL = True
 
 try:
-    from tequila.simulators.simulator_pyquil import BackendCircuitPyquil, BackendExpectationValuePyquil
+    from src.tequila.simulators.simulator_pyquil import BackendCircuitPyquil, BackendExpectationValuePyquil
 
     HAS_PYQUIL = True
     INSTALLED_SIMULATORS["pyquil"] = BackendTypes(BackendCircuitPyquil, BackendExpectationValuePyquil)
@@ -138,14 +138,14 @@ except ImportError:
 
 HAS_QLM = True
 try:
-    from tequila.simulators.simulator_qlm import BackendCircuitQLM, BackendExpectationValueQLM
+    from src.tequila.simulators.simulator_qlm import BackendCircuitQLM, BackendExpectationValueQLM
 
     INSTALLED_SIMULATORS["qlm"] = BackendTypes(BackendCircuitQLM, BackendExpectationValueQLM)
     INSTALLED_SAMPLERS["qlm"] = BackendTypes(BackendCircuitQLM, BackendExpectationValueQLM)
 except ImportError:
     HAS_QLM = False
 
-from tequila.simulators.simulator_symbolic import BackendCircuitSymbolic, BackendExpectationValueSymbolic
+from src.tequila.simulators.simulator_symbolic import BackendCircuitSymbolic, BackendExpectationValueSymbolic
 
 INSTALLED_SIMULATORS["symbolic"] = BackendTypes(CircType=BackendCircuitSymbolic,
                                                 ExpValueType=BackendExpectationValueSymbolic)

@@ -4,7 +4,7 @@ import copy
 import warnings
 from dataclasses import dataclass, field
 
-from tequila import QCircuit, ExpectationValue, minimize, TequilaWarning
+from src.tequila import QCircuit, ExpectationValue, minimize, TequilaWarning
 from . import QuantumChemistryBase, ParametersQC, NBodyTensor
 
 """

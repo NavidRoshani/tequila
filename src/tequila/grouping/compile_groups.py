@@ -1,9 +1,9 @@
-from tequila.grouping.binary_rep import BinaryHamiltonian
-from tequila.grouping.fermionic_methods import get_fermion_wise, do_fff, do_svd
-from tequila.grouping.fermionic_functions import n_elec
-from tequila.utils import TequilaException
+from src.tequila.grouping.binary_rep import BinaryHamiltonian
+from src.tequila.grouping.fermionic_methods import get_fermion_wise, do_fff, do_svd
+from src.tequila.grouping.fermionic_functions import n_elec
+from src.tequila.utils import TequilaException
 from openfermion import reverse_jordan_wigner
-import tequila as tq
+import src.tequila as tq
 import numpy as np
 import numpy.linalg as npl
 import copy

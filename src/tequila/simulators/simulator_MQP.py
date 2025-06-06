@@ -1,4 +1,4 @@
-from tequila.simulators.simulator_qiskit import BackendCircuitQiskit, BackendExpectationValueQiskit, TequilaQiskitException
+from src.tequila.simulators.simulator_qiskit import BackendCircuitQiskit, BackendExpectationValueQiskit, TequilaQiskitException
 from mqp.qiskit_provider import MQPProvider, MQPBackend
 from qiskit_aqt_provider import AQTProvider
 from qiskit_aqt_provider.aqt_resource import AQTResource
@@ -6,8 +6,8 @@ from qiskit_aqt_provider.primitives import AQTEstimator, AQTSampler
 
 from qiskit.circuit import QuantumCircuit
 import qiskit_aqt_provider
-from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
-from tequila import TequilaException, TequilaWarning
+from src.tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
+from src.tequila import TequilaException, TequilaWarning
 
 
 

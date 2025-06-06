@@ -1,15 +1,15 @@
 import copy
 from dataclasses import dataclass
-from tequila import TequilaException, BitString, TequilaWarning
-from tequila.hamiltonian import QubitHamiltonian
+from src.tequila import TequilaException, BitString, TequilaWarning
+from src.tequila.hamiltonian import QubitHamiltonian
 
-from tequila.hamiltonian.paulis import Sp, Sm, Zero
+from src.tequila.hamiltonian.paulis import Sp, Sm, Zero
 
-from tequila.circuit import QCircuit, gates
-from tequila.objective.objective import Variable, Variables, ExpectationValue
+from src.tequila.circuit import QCircuit, gates
+from src.tequila.objective.objective import Variable, Variables, ExpectationValue
 
-from tequila.simulators.simulator_api import simulate
-from tequila.utils import to_float
+from src.tequila.simulators.simulator_api import simulate
+from src.tequila.utils import to_float
 from .chemistry_tools import ActiveSpaceData, FermionicGateImpl, prepare_product_state, ClosedShellAmplitudes, \
     Amplitudes, ParametersQC, NBodyTensor, IntegralManager
 
@@ -17,7 +17,7 @@ from .encodings import known_encodings
 
 import typing, numpy, numbers
 from itertools import product
-import tequila.grouping.fermionic_functions as ff
+import src.tequila.grouping.fermionic_functions as ff
 
 
 try:
@@ -199,7 +199,8 @@ class QuantumChemistryBase:
     def make_excitation_generator(self,
                                   indices: typing.Iterable[typing.Tuple[int, int]],
                                   form: str = None,
-                                  remove_constant_term: bool = True) -> QubitHamiltonian:
+                                  remove_constant_term: bool = True,
+                                  use_openfermion = False) -> QubitHamiltonian:
         """
         Notes
         ----------
@@ -293,6 +294,9 @@ class QuantumChemistryBase:
             else:
                 raise TequilaException(
                     "Unknown generator form {}, supported are G, P+, P-, G+, G- and P0".format(form))
+
+        if use_openfermion:
+            return op
 
         qop = self.transformation(op)
 
@@ -417,7 +421,7 @@ class QuantumChemistryBase:
         return self.UR(indices[0],indices[1], *args, **kwargs)
 
 
-    def make_excitation_gate(self, indices, angle, control=None, assume_real=True, **kwargs):
+    def make_excitation_gate(self, indices, angle, control=None, assume_real=True, use_openfermion = False, **kwargs):
         """
         Initialize a fermionic excitation gate defined as
 
@@ -443,8 +447,10 @@ class QuantumChemistryBase:
         if not self.supports_ucc():
             raise TequilaException("Molecule with transformation {} does not support general UCC operations".format(self.transformation))
 
-        generator = self.make_excitation_generator(indices=indices, remove_constant_term=control is None)
-        p0 = self.make_excitation_generator(indices=indices, form="P0", remove_constant_term=control is None)
+        generator = self.make_excitation_generator(indices=indices, remove_constant_term=control is None,
+                                                   use_openfermion=use_openfermion)
+        p0 = self.make_excitation_generator(indices=indices, form="P0", remove_constant_term=control is None,
+                                            use_openfermion=use_openfermion)
         if self.transformation.up_then_down:
             idx = []
             for pair in indices:
@@ -1032,7 +1038,8 @@ class QuantumChemistryBase:
 
         return UD
     
-    def make_spa_ansatz(self, edges, hcb=False,  use_units_of_pi=False, label=None, optimize=None, ladder=True):
+    def make_spa_ansatz(self, edges, hcb=False,  use_units_of_pi=False, label=None, optimize=None, ladder=True,
+                        use_openfermion = True):
         """
         Separable Pair Ansatz (SPA) for general molecules
         see arxiv: 
@@ -1138,7 +1145,8 @@ class QuantumChemistryBase:
                         if hcb:
                             U += self.make_hardcore_boson_excitation_gate(indices=[(q1,c)],angle=angle)
                         else:
-                            U += self.make_excitation_gate(indices=[(2*c,2*q1),(2*c+1,2*q1+1)], angle=angle)
+                            U += self.make_excitation_gate(indices=[(2*c,2*q1),(2*c+1,2*q1+1)], angle=angle,
+                                                           use_openfermion=use_openfermion)
                         previous = q1
         return U
 
@@ -1558,15 +1566,15 @@ class QuantumChemistryBase:
             else:
                 H = self.make_hamiltonian()
             E = ExpectationValue(H=H, U=U)
-            from tequila import minimize
+            from src.tequila import minimize
             return minimize(objective=E, *args, **kwargs).energy
         else:
-            from tequila.quantumchemistry import INSTALLED_QCHEMISTRY_BACKENDS
+            from src.tequila.quantumchemistry import INSTALLED_QCHEMISTRY_BACKENDS
             if "pyscf" not in INSTALLED_QCHEMISTRY_BACKENDS:
                 raise TequilaException(
                     "PySCF needs to be installed to compute {}/{}".format(method, self.parameters.basis_set))
             else:
-                from tequila.quantumchemistry import QuantumChemistryPySCF
+                from src.tequila.quantumchemistry import QuantumChemistryPySCF
                 molx = QuantumChemistryPySCF.from_tequila(self)
                 return molx.compute_energy(method=method)
 

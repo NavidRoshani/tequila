@@ -6,8 +6,8 @@ from copy import deepcopy
 from numbers import Real
 import numpy
 
-from tequila import BitString, QCircuit, TequilaException,Variable,compile_circuit
-from tequila.circuit import gates
+from src.tequila import BitString, QCircuit, TequilaException,Variable,compile_circuit
+from src.tequila.circuit import gates
 try:
     from openfermion.ops.representations import get_active_space_integrals  # needs openfermion 1.3
 except ImportError as E:

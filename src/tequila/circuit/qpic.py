@@ -3,7 +3,7 @@ Export QCircuits as qpic files
 https://github.com/qpic/qpic/blob/master/doc/qpic_doc.pdf
 """
 
-from tequila.objective.objective import FixedVariable
+from src.tequila.objective.objective import FixedVariable
 
 import subprocess, numpy
 from shutil import which

@@ -6,14 +6,14 @@ The whole thing is currently not very stable
 .... proceed with caution
 """
 
-from tequila.circuit import QCircuit
-from tequila import BitString
+from src.tequila.circuit import QCircuit
+from src.tequila import BitString
 import typing, numpy, copy
-from tequila import TequilaException
-from tequila.apps._unary_state_prep_impl import UnaryStatePrepImpl, sympy
-from tequila.simulators.simulator_symbolic import BackendCircuitSymbolic
-from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
-from tequila.objective.objective import assign_variable
+from src.tequila import TequilaException
+from src.tequila.apps._unary_state_prep_impl import UnaryStatePrepImpl, sympy
+from src.tequila.simulators.simulator_symbolic import BackendCircuitSymbolic
+from src.tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
+from src.tequila.objective.objective import assign_variable
 
 
 class TequilaUnaryStateException(TequilaException):

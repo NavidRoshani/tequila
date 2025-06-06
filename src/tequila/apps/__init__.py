@@ -1,7 +1,7 @@
-from tequila.utils import TequilaException
-from tequila.apps.unary_state_prep import UnaryStatePrep
-from tequila.apps import adapt
-from tequila.apps import krylov
+from src.tequila.utils import TequilaException
+from src.tequila.apps.unary_state_prep import UnaryStatePrep
+from src.tequila.apps import adapt
+from src.tequila.apps import krylov
 
 def gem(circuits:list, H, variables:dict=None, *args, **kwargs):
     """

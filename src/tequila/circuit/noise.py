@@ -1,6 +1,6 @@
 import typing
-from tequila.tools import list_assignment
-from tequila.utils import TequilaException
+from src.tequila.tools import list_assignment
+from src.tequila.utils import TequilaException
 import copy
 
 names_dict = {

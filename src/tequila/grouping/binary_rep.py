@@ -1,9 +1,9 @@
-from tequila import TequilaException
-from tequila.hamiltonian import QubitHamiltonian, PauliString
-from tequila.grouping.binary_utils import get_lagrangian_subspace, binary_symplectic_inner_product, binary_solve, binary_phase, gen_single_qubit_term, largest_first, recursive_largest_first, sorted_insertion_grouping
-from tequila.grouping.overlapping_methods import OverlappingGroups, OverlappingAuxiliary, get_opt_sample_size
+from src.tequila import TequilaException
+from src.tequila.hamiltonian import QubitHamiltonian, PauliString
+from src.tequila.grouping.binary_utils import get_lagrangian_subspace, binary_symplectic_inner_product, binary_solve, binary_phase, gen_single_qubit_term, largest_first, recursive_largest_first, sorted_insertion_grouping
+from src.tequila.grouping.overlapping_methods import OverlappingGroups, OverlappingAuxiliary, get_opt_sample_size
 import numpy as np
-import tequila as tq
+import src.tequila as tq
 import numbers
 from copy import deepcopy
 
