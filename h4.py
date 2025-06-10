@@ -60,9 +60,9 @@ best = min(energies)
 data1[(1,0)]=best
 variables = {**variables_preopt}
 # compute static energies with the pre-optimized basis
-v,vv = gem_fast(circuits=circuits[:2], variables=variables, H=H)
+v,vv = gem_fast(circuits=circuits[:2],solver="qulacs", variables=variables, H=H)
 data1[(2,0)]=v[0]
-v,vv = gem_fast(circuits=circuits[:3], variables=variables, H=H)
+v,vv = gem_fast(circuits=circuits[:3],solver="openfermion", variables=variables, H=H)
 data1[(3,0)]=v[0]
 
 # relax circuit parameters
