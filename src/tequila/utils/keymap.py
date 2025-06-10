@@ -1,6 +1,6 @@
 import typing
 import numbers
-from src.tequila import BitNumbering, BitString, BitStringLSB
+from tequila import BitNumbering, BitString, BitStringLSB
 
 
 class KeyMapABC:

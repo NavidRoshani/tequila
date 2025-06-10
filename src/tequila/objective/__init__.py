@@ -1,5 +1,5 @@
-from src.tequila.objective.objective import Objective,\
+from tequila.objective.objective import Objective,\
     ExpectationValue, Variable, assign_variable, format_variable_list, \
     format_variable_dictionary
 
-from src.tequila.objective.qtensor import QTensor, VectorObjective, vectorize
+from tequila.objective.qtensor import QTensor, VectorObjective, vectorize

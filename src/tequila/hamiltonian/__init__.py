@@ -1,2 +1,2 @@
-from src.tequila.hamiltonian.qubit_hamiltonian import PauliString, QubitHamiltonian
-from src.tequila.hamiltonian import paulis
+from tequila.hamiltonian.qubit_hamiltonian import PauliString, QubitHamiltonian
+from tequila.hamiltonian import paulis

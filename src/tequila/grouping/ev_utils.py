@@ -2,7 +2,7 @@ from openfermion import QubitOperator
 import numpy as np
 from scipy.sparse import csc_matrix
 from itertools import combinations
-from src.tequila import TequilaException
+from tequila import TequilaException
 
 def get_pauli_word_tuple(P: QubitOperator):
     """Given a single pauli word P, extract the tuple representing the word.

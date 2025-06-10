@@ -11,9 +11,9 @@ Needs complete re-implementation at some point
 
 '''
 
-from src.tequila.circuit import QCircuit
-from src.tequila.circuit.gates import CNOT, Ry, X
-from src.tequila.objective.objective import Variable
+from tequila.circuit import QCircuit
+from tequila.circuit.gates import CNOT, Ry, X
+from tequila.objective.objective import Variable
 import sympy
 
 

@@ -4,10 +4,10 @@ of Pauli Operators. Resulting structures can be added and multiplied together.
 Currently uses OpenFermion as backend (QubitOperators)
 """
 import typing
-from src.tequila.hamiltonian import QubitHamiltonian
-from src.tequila import BitString, TequilaException
-from src.tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
-from src.tequila.tools import list_assignment
+from tequila.hamiltonian import QubitHamiltonian
+from tequila import BitString, TequilaException
+from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
+from tequila.tools import list_assignment
 import numpy
 
 def from_string(string, openfermion_format=False):

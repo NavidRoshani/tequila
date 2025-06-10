@@ -1,7 +1,7 @@
 # Generalized Adaptive Solvers
 # as described in Kottmann, Anand, Aspuru-Guzik: https://doi.org/10.1039/D0SC06627C
 
-from src.tequila import QCircuit, QubitHamiltonian, gates, paulis, grad, simulate, TequilaWarning, TequilaException, minimize, ExpectationValue
+from tequila import QCircuit, QubitHamiltonian, gates, paulis, grad, simulate, TequilaWarning, TequilaException, minimize, ExpectationValue
 import numpy
 import dataclasses
 import warnings

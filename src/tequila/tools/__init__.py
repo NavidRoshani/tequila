@@ -1,1 +1,1 @@
-from src.tequila.tools.convenience import number_to_string, list_assignment
+from tequila.tools.convenience import number_to_string, list_assignment

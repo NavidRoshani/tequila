@@ -1,9 +1,9 @@
 import numbers
 import typing
 
-from src.tequila.tools import number_to_string
-from src.tequila.utils import to_float
-from src.tequila import TequilaException
+from tequila.tools import number_to_string
+from tequila.utils import to_float
+from tequila import TequilaException
 
 from openfermion import QubitOperator
 from functools import reduce

@@ -1,10 +1,10 @@
-from src.tequila.simulators.simulator_base import BackendCircuit, QCircuit, BackendExpectationValue
-from src.tequila.utils.bitstrings import reverse_int_bits
-from src.tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
-from src.tequila import TequilaException, TequilaWarning
-from src.tequila import BitString, BitNumbering, BitStringLSB
-from src.tequila.utils.keymap import KeyMapRegisterToSubregister
-from src.tequila.utils import to_float
+from tequila.simulators.simulator_base import BackendCircuit, QCircuit, BackendExpectationValue
+from tequila.utils.bitstrings import reverse_int_bits
+from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
+from tequila import TequilaException, TequilaWarning
+from tequila import BitString, BitNumbering, BitStringLSB
+from tequila.utils.keymap import KeyMapRegisterToSubregister
+from tequila.utils import to_float
 from typing import Union
 import warnings
 import numpy as np

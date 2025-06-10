@@ -1,7 +1,7 @@
-from src.tequila.quantumchemistry.qc_base import QuantumChemistryBase, TequilaException, TequilaWarning, \
+from tequila.quantumchemistry.qc_base import QuantumChemistryBase, TequilaException, TequilaWarning, \
     QCircuit, gates
-from src.tequila.quantumchemistry import ParametersQC, NBodyTensor
-from src.tequila import ExpectationValue
+from tequila.quantumchemistry import ParametersQC, NBodyTensor
+from tequila import ExpectationValue
 from .chemistry_tools import OrbitalData
 import typing
 import numpy

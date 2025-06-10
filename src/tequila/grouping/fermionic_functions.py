@@ -1,13 +1,13 @@
 import numpy as np
-import src.tequila as tq
+import tequila as tq
 import openfermion as of
 from openfermion import FermionOperator, QubitOperator, expectation, get_sparse_operator, jordan_wigner, reverse_jordan_wigner, normal_ordered, count_qubits, variance
 from itertools import product
 import scipy as sp
-import src.tequila.grouping.ev_utils as evu
+import tequila.grouping.ev_utils as evu
 from functools import partial
 import multiprocessing as mp
-from src.tequila import TequilaException
+from tequila import TequilaException
 
 def get_obt_tbt(h_ferm, spin_orb=True):
     '''

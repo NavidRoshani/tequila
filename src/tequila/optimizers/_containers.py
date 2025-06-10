@@ -1,6 +1,6 @@
 import numpy
-from src.tequila.objective import format_variable_dictionary
-from src.tequila.tools.qng import evaluate_qng
+from tequila.objective import format_variable_dictionary
+from tequila.tools.qng import evaluate_qng
 import sys
 """
 Define Containers for SciPy usage

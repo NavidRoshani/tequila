@@ -1,12 +1,12 @@
-from src.tequila.utils import TequilaException, to_float, TequilaWarning
-from src.tequila.circuit.circuit import QCircuit
-from src.tequila.utils.keymap import KeyMapSubregisterToRegister
-from src.tequila.utils.misc import to_float
-from src.tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
-from src.tequila.circuit.compiler import change_basis
-from src.tequila import BitString
-from src.tequila.objective.objective import Variable, format_variable_dictionary
-from src.tequila.circuit import compiler
+from tequila.utils import TequilaException, to_float, TequilaWarning
+from tequila.circuit.circuit import QCircuit
+from tequila.utils.keymap import KeyMapSubregisterToRegister
+from tequila.utils.misc import to_float
+from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
+from tequila.circuit.compiler import change_basis
+from tequila import BitString
+from tequila.objective.objective import Variable, format_variable_dictionary
+from tequila.circuit import compiler
 from typing import Union
 
 import numbers, typing, numpy, copy, warnings

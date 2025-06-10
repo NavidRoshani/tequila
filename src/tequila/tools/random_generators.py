@@ -1,7 +1,7 @@
 import numpy as np
-from src.tequila.circuit import gates
-from src.tequila.circuit.circuit import QCircuit
-from src.tequila.hamiltonian.qubit_hamiltonian import QubitHamiltonian
+from tequila.circuit import gates
+from tequila.circuit.circuit import QCircuit
+from tequila.hamiltonian.qubit_hamiltonian import QubitHamiltonian
 from scipy.stats import unitary_group, ortho_group
 
 def make_random_circuit(n_qubits: int, rotation_gates: list=['rx', 'ry', 'rz'], n_rotations: int=None,

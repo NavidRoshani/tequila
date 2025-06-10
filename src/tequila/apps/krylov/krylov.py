@@ -1,7 +1,7 @@
 import copy
 import scipy
-from src.tequila import braket, QTensor, simulate
-from src.tequila.hamiltonian.qubit_hamiltonian import QubitHamiltonian
+from tequila import braket, QTensor, simulate
+from tequila.hamiltonian.qubit_hamiltonian import QubitHamiltonian
 
 
 def krylov_method(krylov_circs:list, H:QubitHamiltonian, variables:dict=None, assume_real:bool=False, *args, **kwargs)->tuple:

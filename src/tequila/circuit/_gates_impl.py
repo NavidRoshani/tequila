@@ -2,10 +2,10 @@ import typing
 import copy
 import numbers
 from abc import ABC
-from src.tequila.utils.exceptions import TequilaException
-from src.tequila.objective.objective import Variable, FixedVariable, assign_variable
-from src.tequila.hamiltonian import PauliString, QubitHamiltonian, paulis
-from src.tequila.tools import list_assignment
+from tequila.utils.exceptions import TequilaException
+from tequila.objective.objective import Variable, FixedVariable, assign_variable
+from tequila.hamiltonian import PauliString, QubitHamiltonian, paulis
+from tequila.tools import list_assignment
 import numpy as np
 
 from dataclasses import dataclass

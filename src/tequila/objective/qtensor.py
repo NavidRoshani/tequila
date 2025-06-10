@@ -1,6 +1,6 @@
 import numpy, typing
 from .objective import Objective, ExpectationValueImpl, format_variable_dictionary
-from src.tequila import TequilaException
+from tequila import TequilaException
 
 class QTensor(numpy.ndarray):
     # see here: https://numpy.org/devdocs/user/basics.subclassing.html

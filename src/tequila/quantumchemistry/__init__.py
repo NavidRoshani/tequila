@@ -1,7 +1,7 @@
 import typing
 import warnings
 
-from src.tequila import TequilaWarning
+from tequila import TequilaWarning
 from .qc_base import QuantumChemistryBase
 from .chemistry_tools import ParametersQC, NBodyTensor
 from .madness_interface import QuantumChemistryMadness

@@ -1,9 +1,9 @@
-from src.tequila.optimizers.optimizer_base import OptimizerHistory, Optimizer, TequilaOptimizerException, OptimizerResults
-from src.tequila.optimizers.optimizer_scipy import OptimizerSciPy
-from src.tequila.optimizers.optimizer_gd import OptimizerGD
-from src.tequila.optimizers.optimizer_scipy import minimize as minimize_scipy
-from src.tequila.optimizers.optimizer_gd import minimize as minimize_gd
-from src.tequila.simulators.simulator_api import simulate
+from tequila.optimizers.optimizer_base import OptimizerHistory, Optimizer, TequilaOptimizerException, OptimizerResults
+from tequila.optimizers.optimizer_scipy import OptimizerSciPy
+from tequila.optimizers.optimizer_gd import OptimizerGD
+from tequila.optimizers.optimizer_scipy import minimize as minimize_scipy
+from tequila.optimizers.optimizer_gd import minimize as minimize_gd
+from tequila.simulators.simulator_api import simulate
 from dataclasses import dataclass
 
 import typing, numbers, numpy

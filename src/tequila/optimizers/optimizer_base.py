@@ -3,12 +3,12 @@ Base class for Optimizers.
 """
 import typing, numbers, copy, warnings
 
-from src.tequila.utils.exceptions import TequilaException, TequilaWarning
-from src.tequila.simulators.simulator_api import compile, pick_backend
-from src.tequila.objective import Objective
-from src.tequila.circuit.gradient import grad
+from tequila.utils.exceptions import TequilaException, TequilaWarning
+from tequila.simulators.simulator_api import compile, pick_backend
+from tequila.objective import Objective
+from tequila.circuit.gradient import grad
 from dataclasses import dataclass, field
-from src.tequila.objective.objective import assign_variable, Variable, format_variable_dictionary, format_variable_list
+from tequila.objective.objective import assign_variable, Variable, format_variable_dictionary, format_variable_list
 import numpy
 from random import choices
 

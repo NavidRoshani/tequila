@@ -11,9 +11,9 @@ try:
 except ImportError:
     HAS_PYZX = False
 
-from src.tequila import TequilaException
-from src.tequila import export_open_qasm, import_open_qasm
-from src.tequila.circuit import QCircuit
+from tequila import TequilaException
+from tequila import export_open_qasm, import_open_qasm
+from tequila.circuit import QCircuit
 
 
 def convert_to_pyzx(circuit: QCircuit, variables=None):

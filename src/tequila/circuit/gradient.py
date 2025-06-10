@@ -1,12 +1,12 @@
-from src.tequila.circuit.compiler import CircuitCompiler
-from src.tequila.objective.objective import Objective, ExpectationValueImpl, Variable, \
+from tequila.circuit.compiler import CircuitCompiler
+from tequila.objective.objective import Objective, ExpectationValueImpl, Variable, \
     assign_variable, identity, FixedVariable
-from src.tequila import TequilaException
-from src.tequila.objective import QTensor
-from src.tequila.simulators.simulator_api import compile
+from tequila import TequilaException
+from tequila.objective import QTensor
+from tequila.simulators.simulator_api import compile
 import typing
 from numpy import vectorize
-from src.tequila.autograd_imports import jax, __AUTOGRAD__BACKEND__
+from tequila.autograd_imports import jax, __AUTOGRAD__BACKEND__
 
 
 def grad(objective: typing.Union[Objective, QTensor], variable: Variable = None, no_compile=False, *args, **kwargs):

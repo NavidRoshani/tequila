@@ -1,10 +1,10 @@
 import numpy, typing, numbers
-from src.tequila.objective import Objective
-from src.tequila.objective.objective import Variable, format_variable_dictionary
+from tequila.objective import Objective
+from tequila.objective.objective import Variable, format_variable_dictionary
 from .optimizer_base import Optimizer, OptimizerResults, dataclass
-from src.tequila.circuit.noise import NoiseModel
-from src.tequila.tools.qng import get_qng_combos, CallableVector, QNGVector
-from src.tequila.utils import TequilaException
+from tequila.circuit.noise import NoiseModel
+from tequila.tools.qng import get_qng_combos, CallableVector, QNGVector
+from tequila.utils import TequilaException
 
 @dataclass
 class GDResults(OptimizerResults):

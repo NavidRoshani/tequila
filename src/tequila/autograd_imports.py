@@ -1,6 +1,6 @@
 # make sure to use the jax/autograd numpy
 # will import either jax or autograd, depending on what is available on the system
-from src.tequila.utils.exceptions import TequilaException
+from tequila.utils.exceptions import TequilaException
 
 __AUTOGRAD__BACKEND__ = None
 try:

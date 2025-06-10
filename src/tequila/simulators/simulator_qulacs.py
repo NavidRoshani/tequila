@@ -4,11 +4,11 @@ import qulacs
 import numbers, numpy
 import warnings
 
-from src.tequila import TequilaException, TequilaWarning
-from src.tequila.utils.bitstrings import BitNumbering, BitString, BitStringLSB, reverse_int_bits
-from src.tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
-from src.tequila.simulators.simulator_base import BackendCircuit, BackendExpectationValue, QCircuit, change_basis
-from src.tequila.utils.keymap import KeyMapRegisterToSubregister
+from tequila import TequilaException, TequilaWarning
+from tequila.utils.bitstrings import BitNumbering, BitString, BitStringLSB, reverse_int_bits
+from tequila.wavefunction.qubit_wavefunction import QubitWaveFunction
+from tequila.simulators.simulator_base import BackendCircuit, BackendExpectationValue, QCircuit, change_basis
+from tequila.utils.keymap import KeyMapRegisterToSubregister
 
 """
 Developer Note:

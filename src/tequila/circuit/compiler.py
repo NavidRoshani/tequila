@@ -1,12 +1,12 @@
-from src.tequila import TequilaException
-from src.tequila.circuit.circuit import QCircuit
-from src.tequila.circuit.gates import Rx, Ry, H, X, Rz, ExpPauli, CNOT, Phase, T, Z
-from src.tequila.circuit._gates_impl import RotationGateImpl, PhaseGateImpl, QGateImpl, \
+from tequila import TequilaException
+from tequila.circuit.circuit import QCircuit
+from tequila.circuit.gates import Rx, Ry, H, X, Rz, ExpPauli, CNOT, Phase, T, Z
+from tequila.circuit._gates_impl import RotationGateImpl, PhaseGateImpl, QGateImpl, \
     ExponentialPauliGateImpl, TrotterizedGateImpl, PowerGateImpl
-from src.tequila.utils import to_float
-from src.tequila.objective.objective import Variable, FixedVariable
-from src.tequila.objective.objective import Objective
-from src.tequila.objective.objective import ExpectationValueImpl
+from tequila.utils import to_float
+from tequila.objective.objective import Variable, FixedVariable
+from tequila.objective.objective import Objective
+from tequila.objective.objective import ExpectationValueImpl
 import numpy
 from numpy import pi as pi
 
