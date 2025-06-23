@@ -1,6 +1,7 @@
 import tequila as tq
 import numpy
 from src_vb.qvalence.utils import Rot, Corr, GNM, gem_fast
+from utils_mcvbt import *
 
 """
 Compute the data from Fig.1 in the paper
@@ -55,14 +56,18 @@ for U in circuits:
     wfn = tq.simulate(U, variables=result.variables)
     wfns.append(wfn)
 
-best = min(energies)
+H_fermion = make_fermionic_Ham(mol=mol)
 
+best = min(energies)
+angles_dict, gen_dict, generators = create_ferionic_generators(graphs=graphs, variables=variables_preopt)
 data1[(1,0)]=best
 variables = {**variables_preopt}
 # compute static energies with the pre-optimized basis
-v,vv = gem_fast(circuits=circuits[:2],solver="qulacs", variables=variables, H=H)
+v,vv = gem_fast(circuits=circuits[:2],solver="qulacs", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
+_,_ = gem_fast(circuits=circuits[:2],solver="openfermion", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
+exit()
 data1[(2,0)]=v[0]
-v,vv = gem_fast(circuits=circuits[:3],solver="openfermion", variables=variables, H=H)
+v,vv = gem_fast(circuits=circuits[:3],solver="openfermion", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
 data1[(3,0)]=v[0]
 
 # relax circuit parameters

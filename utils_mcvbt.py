@@ -9,6 +9,8 @@ from src_vb.qvalence.utils import *
 from src.tequila.hamiltonian import QubitHamiltonian
 from typing import Tuple
 import numpy as np
+import time
+from itertools import islice
 
 def create_spa_circuit(graphs:list, mol: QuantumChemistryBase, deloc: str|None = None) -> list[QCircuit]:
 
@@ -24,25 +26,51 @@ def create_spa_circuit(graphs:list, mol: QuantumChemistryBase, deloc: str|None =
     return circuits
 
 
-def create_ferionic_generators(graphs:list):
+def create_ferionic_generators(graphs:list, variables: dict):
 
+    variable_keys = list(variables.keys())
     generators = []
+    angles_list= []
+
     for i_g, graph in enumerate(graphs):
-        for edge in graph:
-            i = edge[0]
+        g=0
+        for i_e, edge in enumerate(graph): # create SPAs
+            i_spa = edge[0]
             if len(edge) == 0: continue
-            g = 0
-            for j in edge[1:]:
-                g += make_excitation_generator_op(indices=[(2 * i, 2 * j), (2 * i + 1, 2 * j + 1)])
-                circ = openfermion.trotterize_exp_qubop_to_qasm()
-        for edge in graph:
-            i = edge[0]
+
+            for j_spa in edge[1:]:
+                g += make_excitation_generator_op(indices=[(2 * i_spa, 2 * j_spa), (2 * i_spa + 1, 2 * j_spa + 1)])
+                angles_list.append(g)
+
+
+        for i_r, edge in enumerate(graph): #create OR
+            i_or = edge[0]
             if len(edge) == 0: continue
-            for j in edge[1:]:
-                g += make_excitation_generator_op(indices=[(2 * i, 2 * j)])
-                g += make_excitation_generator_op(indices=[(2 * i + 1, 2 * j + 1)])
-        generators.append([g])
-    return generators
+
+            for j_or in edge[1:]:
+                g += make_excitation_generator_op(indices=[(2 * i_or, 2 * j_or)])
+                g += make_excitation_generator_op(indices=[(2 * i_or + 1, 2 * j_or + 1)])
+                angles_list.append(g)
+
+        #todo make delocalisation
+
+        generators.append(g)
+
+            #generators[variable_keys[(i_g + 1) * ( i_r + len(graph)+1) - 1]] = g
+            #print(variable_keys[(i_g + 1) * (i_r + len(graph) + 1) - 1])
+
+    angle_dict ={}
+    gen_dict = {}
+
+    for i, generator in enumerate(angles_list):
+        angle_dict[variable_keys[i]] = generator
+    it = iter(variable_keys)
+    n = len(generators) + 1
+    res = [list(islice(it, n)) for _ in range((len(variable_keys) + n - 1) // n)]
+    for i, _ in enumerate(generators):
+        gen_dict[i] = res[i]
+
+    return angle_dict, gen_dict, generators
 
 
 def add_delocalization(circuit, strategy:str|None, graph: list, mol: QuantumChemistryBase) -> QCircuit:
@@ -68,7 +96,7 @@ def add_delocalization(circuit, strategy:str|None, graph: list, mol: QuantumChem
     return circuit
 
 
-def run_mcvbt_optimization(circuits:list[QCircuit], H: QubitHamiltonian, H_Fermion) -> Tuple[float,list[float]]:
+def run_mcvbt_optimization(circuits:list[QCircuit], graphs: list, H: QubitHamiltonian, H_Fermion, solver) -> list[float]:
 
 
     variables_preopt = {}
@@ -78,13 +106,14 @@ def run_mcvbt_optimization(circuits:list[QCircuit], H: QubitHamiltonian, H_Fermi
         result = tq.minimize(E, silent=True)
         variables_preopt = {**variables_preopt, **result.variables}
         energies.append(result.energy)
-    exact_energy = min(energies)
-
 
     variables = {**variables_preopt}
+    angles_dict, gen_dict, generators = create_ferionic_generators(graphs=graphs, variables=variables)
+    variables2 = variables
     energies = []
     for i in range(2,len(circuits)+1):
-        v, _ = gem_fast(circuits=circuits[:i],solver="openfermion", variables=variables, H=H, H_Fermion=H_Fermion)
+        v, _ = gem_fast(circuits=circuits[:i],solver=solver, variables=variables,
+                        generator_dict=gen_dict,angle_dict=angles_dict, H=H, H_Fermion=H_Fermion)
         energies.append(v[0])
 
     for j in range(1, len(circuits)+1):
@@ -92,10 +121,20 @@ def run_mcvbt_optimization(circuits:list[QCircuit], H: QubitHamiltonian, H_Fermi
             if (i==1) and (j==1):
                 pass
             else:
-                v,_,variables = GNM(circuits=circuits[:i], variables=variables, H=H,H_Fermion=H_Fermion, M=j)
-                energies.append(v[0])
+                # start_t = time.time()
+                # v,_,variables = GNM(circuits=circuits[:i], variables=variables,generator_dict=gen_dict,angle_dict=angles_dict, H=H,H_Fermion=H_Fermion, M=j,
+                #                     solver=solver)
+                # end_t = time.time()
+                start_t2 = time.time()
+                v2, _, variables2 = GNM(circuits=circuits[:i], variables=variables2,generator_dict=gen_dict,angle_dict=angles_dict, H=H, H_Fermion=H_Fermion, M=j,
+                                       solver=solver)
+                end_t2 = time.time()
+                energies.append(v2[0])
+                # print(f"Qulacs Time: {end_t-start_t}")
+                print(f"OpenFermion Time: {end_t2-start_t2}")
+                # print(f"Energy Difference: {abs(v2[0]-v[0])}")
 
-    return exact_energy, energies
+    return energies
 
 
 def project_to_plane(geometry):

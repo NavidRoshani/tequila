@@ -25,12 +25,12 @@ def run_optimization(mol: QuantumChemistryBase, *args, **kwargs):
     H_fermion = make_fermionic_Ham(mol=mol)
 
     circuits = create_spa_circuit(graphs=graphs,mol=mol, deloc=None)
-    # generatros = create_ferionic_generators(graphs=graphs)
-
-
+    #generatros = create_ferionic_generators(graphs=graphs)
 
     # pre-optimize the circuits
-    exact_energies, energies = run_mcvbt_optimization(circuits=circuits,H=H, H_Fermion=H_fermion)
+
+
+    energies = run_mcvbt_optimization(circuits=circuits, graphs=graphs, H=H, H_Fermion=H_fermion, solver="openfermion")
 
     for energy in energies:
         error = abs(energy-fci)
