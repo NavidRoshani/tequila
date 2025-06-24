@@ -1,7 +1,8 @@
-import tequila as tq
-import numpy
-from src_vb.qvalence.utils import Rot, Corr, GNM, gem_fast
+
 from utils_mcvbt import *
+
+from src_vb.qvalence.utils import Rot
+
 
 """
 Compute the data from Fig.1 in the paper
@@ -18,7 +19,7 @@ geometry1 = "H 1.5 0.0 0.0\nH 0.0 0.0 0.0\nH 1.5 0.0 1.5\nH 0.0 0.0 1.5"
 # linear
 geometry2 = "H 0.0 0.0 0.0\nH 0.0 0.0 1.5\nH 0.0 0.0 3.0\nH 0.0 0.0 4.5"
 
-mol = tq.Molecule(geometry=geometry1, basis_set="sto-6g")
+mol = tq.Molecule(geometry=geometry1, basis_set="sto-6g",  transformation="reorderedjordanwigner")
 # replace with "orthonormalize_basis_orbitals()" for tq.version < 1.8.4
 mol = mol.use_native_orbitals()
 H = mol.make_hamiltonian()
@@ -37,13 +38,13 @@ rot_circuits = []
 spa_circuits = []
 wfns = []
 for i,edges in enumerate(graphs):
-    U = mol.make_ansatz(name="SPA", edges=edges, label="G{}".format(i))
-    spa_circuits.append(U)
+    # U = mol.make_ansatz(name="SPA", edges=edges, label="G{}".format(i))
+    # spa_circuits.append(U)
     UR = tq.QCircuit()
     for e in edges:
-        UR += Rot(e,mol,i) 
-    rot_circuits.append(UR)
-    circuits.append(U+UR)
+     UR += Rot(e,mol,i)
+    # rot_circuits.append(UR)
+    circuits.append(UR)
 
 # pre-optimize the circuits
 variables_preopt = {}
@@ -57,9 +58,11 @@ for U in circuits:
     wfns.append(wfn)
 
 H_fermion = make_fermionic_Ham(mol=mol)
+print(H_fermion)
+print(H)
 
 best = min(energies)
-angles_dict, gen_dict, generators = create_ferionic_generators(graphs=graphs, variables=variables_preopt)
+angles_dict, gen_dict, generators = create_ferionic_generators(graphs=graphs, variables=variables_preopt, mol=mol)
 data1[(1,0)]=best
 variables = {**variables_preopt}
 # compute static energies with the pre-optimized basis

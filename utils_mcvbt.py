@@ -2,7 +2,8 @@ from typing import Union
 
 from IPython.core.ultratb import ListTB
 
-import src.tequila as tq
+
+
 from src.tequila.quantumchemistry import QuantumChemistryBase
 from src.tequila.circuit import QCircuit
 from src_vb.qvalence.utils import *
@@ -26,31 +27,37 @@ def create_spa_circuit(graphs:list, mol: QuantumChemistryBase, deloc: str|None =
     return circuits
 
 
-def create_ferionic_generators(graphs:list, variables: dict):
+def create_ferionic_generators(graphs:list, variables: dict, mol:QuantumChemistryBase): #todo fix ordering
 
     variable_keys = list(variables.keys())
+
     generators = []
     angles_list= []
 
     for i_g, graph in enumerate(graphs):
         g=0
-        for i_e, edge in enumerate(graph): # create SPAs
-            i_spa = edge[0]
-            if len(edge) == 0: continue
+        # for i_e, edge in enumerate(graph): # create SPAs
+        #     spa = 0
+        #     i_spa = edge[0]
+        #     if len(edge) == 0: continue
+        #     for j_spa in edge[1:]:
+        #         spa += make_excitation_generator_op(indices=[(2 * i_spa, 2 * j_spa), (2 * i_spa + 1, 2 * j_spa + 1)], mol=mol)
+        #
+        #     angles_list.append(spa)
 
-            for j_spa in edge[1:]:
-                g += make_excitation_generator_op(indices=[(2 * i_spa, 2 * j_spa), (2 * i_spa + 1, 2 * j_spa + 1)])
-                angles_list.append(g)
 
 
         for i_r, edge in enumerate(graph): #create OR
+            orbital_rot = 0
             i_or = edge[0]
             if len(edge) == 0: continue
-
             for j_or in edge[1:]:
-                g += make_excitation_generator_op(indices=[(2 * i_or, 2 * j_or)])
-                g += make_excitation_generator_op(indices=[(2 * i_or + 1, 2 * j_or + 1)])
-                angles_list.append(g)
+                orbital_rot += make_excitation_generator_op(indices=[(2 * i_or, 2 * j_or)], mol=mol)
+                orbital_rot += make_excitation_generator_op(indices=[(2 * i_or + 1, 2 * j_or + 1)], mol=mol)
+            angles_list.append(orbital_rot)
+
+        # g += spa
+        g +=  orbital_rot
 
         #todo make delocalisation
 
@@ -64,9 +71,12 @@ def create_ferionic_generators(graphs:list, variables: dict):
 
     for i, generator in enumerate(angles_list):
         angle_dict[variable_keys[i]] = generator
-    it = iter(variable_keys)
-    n = len(generators) + 1
-    res = [list(islice(it, n)) for _ in range((len(variable_keys) + n - 1) // n)]
+
+    res = []
+    for i, _ in enumerate(graphs):
+        n = len(variable_keys)//len(graphs)
+        res.append(variable_keys[i*n:(i+1)*n])
+
     for i, _ in enumerate(generators):
         gen_dict[i] = res[i]
 
