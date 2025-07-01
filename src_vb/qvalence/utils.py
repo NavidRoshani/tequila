@@ -16,11 +16,12 @@ import fqe
 import numpy
 import scipy
 import typing
-import time
+import ast
 
 import warnings
 
 from tequila.quantumchemistry import QuantumChemistryBase
+from itertools import combinations
 
 warnings.filterwarnings("ignore", category=tq.TequilaWarning)
 
@@ -202,48 +203,38 @@ class BraKetOpenfermion:
         self.overlap = overlap
         self.generators_dict = generator_dict
         self.angle_dict = angle_dict
+        self.bin_dict = generate_op_binary_string(self.num_qubits//2,self.num_qubits//4)
 
 
     def __call__(self, variables, *args, **kwargs):
 
-        if self.i == 0:
-            op_i = 1
-        elif self.i == 1:
-            op_i = 0
-        else:
-            op_i =  0
-
-        if self.j == 0:
-            op_j = 1
-        elif self.j == 1:
-            op_j = 0
-        else:
-            op_j = 0
-
-        # op_i=self.j
-        # op_j=self.i #todo fix this to first number of tuple
 
 
+        filtered_out_non_angles = [key for key in variables if key in self.angle_dict]
+
+        angles_bra = filtered_out_non_angles[self.i*4:(self.i+1)*4] # todo split them universal, replace 4
+        angles_ket = filtered_out_non_angles[self.j*4:(self.j+1)*4]
+
+        bra_tuples = filter_angles_to_edges(angles_bra)
+        ket_tuples = filter_angles_to_edges(angles_ket)
+
+        bra_string = binary_string_from_tuples(bra_tuples, self.num_qubits // 2)
+        ket_string = binary_string_from_tuples(ket_tuples, self.num_qubits // 2)
+
+        op_i = self.bin_dict[bra_string]
+        op_j = self.bin_dict[ket_string]
 
         init = self.bra.get_coeff((self.num_qubits // 2, 0))
-        init[op_i][op_i] = 1  # todo ??????
-
+        init[op_i][op_i] = 1
         self.bra.set_wfn(strategy="from_data", raw_data={(self.num_qubits // 2, 0): init})
 
         init2 = self.ket.get_coeff((self.num_qubits // 2, 0))
-        init2[op_j][op_j] = 1  # todo ??????
+        init2[op_j][op_j] = 1
         self.ket.set_wfn(strategy="from_data", raw_data={(self.num_qubits // 2, 0): init2})
         print("bra")
         self.bra.print_wfn()
         print("ket")
         self.ket.print_wfn()
-
-
-        filtered_out_non_angles = [key for key in variables if key in self.angle_dict]
-
-        angles_bra = filtered_out_non_angles[self.i*4:(self.i+1)*4] # todo split them right
-        angles_ket = filtered_out_non_angles[self.j*4:(self.j+1)*4]
-
 
         for variable_key in angles_bra:
             self.bra = self.bra.time_evolve( -0.5* variables[variable_key], self.angle_dict[variable_key])
@@ -453,3 +444,52 @@ def make_fermionic_Ham(mol:QuantumChemistryBase, *args, **kwargs) -> QubitHamilt
     fop = openfermion.transforms.get_fermion_operator(fop)
 
     return fop
+
+
+def generate_op_binary_string(n_orb, n_e):
+    result = {}
+    for index, positions in enumerate(combinations(range(n_orb), n_e)):
+        s = ['0'] * n_orb
+        for pos in positions:
+            s[pos] = '1'
+        binary_str = ''.join(s)
+        result[binary_str] = index
+    return result
+
+
+def binary_string_from_tuples(tuples, n):
+    """
+    Given a list of 2-element tuples and a fixed binary string length n,
+    create a binary string of length n where positions corresponding to the
+    first element of each tuple are set to '1', then reverse the string.
+    """
+    # Initialize a list of '0's
+    binary = ['0'] * n
+
+    # Set bits to '1' at the specified indices
+    for t in tuples:
+        i = t[0]
+        if 0 <= i < n:
+            binary[i] = '1'
+
+    # Reverse the binary string and return it
+    return ''.join(binary[:])
+
+
+def filter_angles_to_edges(objects):
+    result = []
+    for obj in objects:
+        s = str(obj)
+        try:
+            # Parse string to Python tuple/list structure
+            parsed = ast.literal_eval(s)
+
+            # Check if parsed is a tuple with second element 'D'
+            if isinstance(parsed, tuple) and len(parsed) > 1 and parsed[1] == 'D':
+                # Append the first element of the tuple
+                result.append(parsed[0])
+        except (ValueError, SyntaxError):
+            # If string cannot be parsed, just ignore this object
+            pass
+    return result
+
