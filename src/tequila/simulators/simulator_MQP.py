@@ -18,7 +18,7 @@ def get_aqt_backend(token: str = "") -> AQTResource | MQPBackend:
         provider = AQTProvider("INVALID_TOKEN")
         backend = provider.get_backend('offline_simulator_no_noise')
         # backend = AQTEstimator(backend=aqtbackend, options={"shots": 100})
-        print("using dummy backend")
+
 
     else:
         try:

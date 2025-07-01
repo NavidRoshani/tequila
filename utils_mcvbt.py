@@ -27,7 +27,7 @@ def create_spa_circuit(graphs:list, mol: QuantumChemistryBase, deloc: str|None =
     return circuits
 
 
-def create_ferionic_generators(graphs:list, variables: dict, mol:QuantumChemistryBase): #todo fix ordering
+def create_ferionic_generators(graphs:list, variables: dict, mol:QuantumChemistryBase):
 
     variable_keys = list(variables.keys())
 
@@ -36,14 +36,15 @@ def create_ferionic_generators(graphs:list, variables: dict, mol:QuantumChemistr
 
     for i_g, graph in enumerate(graphs):
         g=0
-        # for i_e, edge in enumerate(graph): # create SPAs
-        #     spa = 0
-        #     i_spa = edge[0]
-        #     if len(edge) == 0: continue
-        #     for j_spa in edge[1:]:
-        #         spa += make_excitation_generator_op(indices=[(2 * i_spa, 2 * j_spa), (2 * i_spa + 1, 2 * j_spa + 1)], mol=mol)
-        #
-        #     angles_list.append(spa)
+        for i_e, edge in enumerate(graph): # create SPAs
+            spa = 0
+            i_spa = edge[0]
+            if len(edge) == 0: continue
+            for j_spa in edge[1:]:
+                spa += make_excitation_generator_op(indices=[(2 * i_spa, 2 * j_spa), (2 * i_spa + 1, 2 * j_spa + 1)], mol=mol)
+
+
+            angles_list.append(spa)
 
 
 
@@ -56,8 +57,8 @@ def create_ferionic_generators(graphs:list, variables: dict, mol:QuantumChemistr
                 orbital_rot += make_excitation_generator_op(indices=[(2 * i_or + 1, 2 * j_or + 1)], mol=mol)
             angles_list.append(orbital_rot)
 
-        # g += spa
-        g +=  orbital_rot
+
+        g += spa #+ orbital_rot
 
         #todo make delocalisation
 
@@ -68,7 +69,6 @@ def create_ferionic_generators(graphs:list, variables: dict, mol:QuantumChemistr
 
     angle_dict ={}
     gen_dict = {}
-
     for i, generator in enumerate(angles_list):
         angle_dict[variable_keys[i]] = generator
 
@@ -106,7 +106,8 @@ def add_delocalization(circuit, strategy:str|None, graph: list, mol: QuantumChem
     return circuit
 
 
-def run_mcvbt_optimization(circuits:list[QCircuit], graphs: list, H: QubitHamiltonian, H_Fermion, solver) -> list[float]:
+def run_mcvbt_optimization(circuits:list[QCircuit], graphs: list, H: QubitHamiltonian, H_Fermion, solver,
+                           mol: QuantumChemistryBase) -> list[float]:
 
 
     variables_preopt = {}
@@ -118,7 +119,7 @@ def run_mcvbt_optimization(circuits:list[QCircuit], graphs: list, H: QubitHamilt
         energies.append(result.energy)
 
     variables = {**variables_preopt}
-    angles_dict, gen_dict, generators = create_ferionic_generators(graphs=graphs, variables=variables)
+    angles_dict, gen_dict, generators = create_ferionic_generators(graphs=graphs, variables=variables, mol=mol)
     variables2 = variables
     energies = []
     for i in range(2,len(circuits)+1):

@@ -19,7 +19,7 @@ geometry1 = "H 1.5 0.0 0.0\nH 0.0 0.0 0.0\nH 1.5 0.0 1.5\nH 0.0 0.0 1.5"
 # linear
 geometry2 = "H 0.0 0.0 0.0\nH 0.0 0.0 1.5\nH 0.0 0.0 3.0\nH 0.0 0.0 4.5"
 
-mol = tq.Molecule(geometry=geometry1, basis_set="sto-6g",  transformation="reorderedjordanwigner")
+mol = tq.Molecule(geometry=geometry1, basis_set="sto-6g")
 # replace with "orthonormalize_basis_orbitals()" for tq.version < 1.8.4
 mol = mol.use_native_orbitals()
 H = mol.make_hamiltonian()
@@ -38,13 +38,13 @@ rot_circuits = []
 spa_circuits = []
 wfns = []
 for i,edges in enumerate(graphs):
-    # U = mol.make_ansatz(name="SPA", edges=edges, label="G{}".format(i))
-    # spa_circuits.append(U)
+    U = mol.make_ansatz(name="SPA", edges=edges, label="G{}".format(i))
+    spa_circuits.append(U)
     UR = tq.QCircuit()
     for e in edges:
      UR += Rot(e,mol,i)
-    # rot_circuits.append(UR)
-    circuits.append(UR)
+    rot_circuits.append(UR)
+    circuits.append(U+UR)
 
 # pre-optimize the circuits
 variables_preopt = {}
@@ -58,8 +58,9 @@ for U in circuits:
     wfns.append(wfn)
 
 H_fermion = make_fermionic_Ham(mol=mol)
-print(H_fermion)
-print(H)
+
+solver = "openfermion"
+# solver = "qulacs"
 
 best = min(energies)
 angles_dict, gen_dict, generators = create_ferionic_generators(graphs=graphs, variables=variables_preopt, mol=mol)
@@ -68,25 +69,30 @@ variables = {**variables_preopt}
 # compute static energies with the pre-optimized basis
 v,vv = gem_fast(circuits=circuits[:2],solver="qulacs", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
 _,_ = gem_fast(circuits=circuits[:2],solver="openfermion", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
-exit()
-data1[(2,0)]=v[0]
-v,vv = gem_fast(circuits=circuits[:3],solver="openfermion", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
-data1[(3,0)]=v[0]
 
+data1[(2,0)]=v[0]
+v,vv = gem_fast(circuits=circuits[:3],solver=solver, variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
+data1[(3,0)]=v[0]
+exit()
 # relax circuit parameters
-v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True, M=1)
+v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True, M=1, H_Fermion=H_fermion,
+                     generator_dict=gen_dict, angle_dict=angles_dict, solver=solver)
 data1[(2,1)]=v[0]
 
-v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, M=1)
+v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, M=1, H_Fermion=H_fermion,
+                     generator_dict=gen_dict, angle_dict=angles_dict, solver=solver)
 data1[(3,1)]=v[0]
 
-v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True)
+v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True, H_Fermion=H_fermion,
+                     generator_dict=gen_dict, angle_dict=angles_dict, solver=solver)
 data1[(2,2)]=v[0]
 
-v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, M=2)
+v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, M=2, H_Fermion=H_fermion,
+                     generator_dict=gen_dict, angle_dict=angles_dict, solver=solver)
 data1[(3,2)]=v[0]
 
-v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True)
+v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, H_Fermion=H_fermion,
+                     generator_dict=gen_dict, angle_dict=angles_dict, solver=solver)
 data1[(3,3)]=v[0]
 
 # add more freedeom in orbital rotations
@@ -100,23 +106,23 @@ for i in range(len(circuits)):
     circuits[i] += UR
 
 # reset variables to pre-opt
-variables=variables_preopt
-
-# relax circuit parameters
-v,vv,variables = GNM(circuits=circuits[:1], variables=variables, H=H, silent=True, M=1)
-data2[(1,0)]=v[0]
-v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True, M=1)
-data2[(2,1)]=v[0]
-v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, M=1)
-data2[(3,1)]=v[0]
-
-v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True)
-data2[(2,2)]=v[0]
-
-v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, M=2)
-data2[(3,2)]=v[0]
-v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True)
-data2[(3,3)]=v[0]
+# variables=variables_preopt
+#
+# # relax circuit parameters
+# v,vv,variables = GNM(circuits=circuits[:1], variables=variables, H=H, silent=True, M=1)
+# data2[(1,0)]=v[0]
+# v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True, M=1)
+# data2[(2,1)]=v[0]
+# v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, M=1)
+# data2[(3,1)]=v[0]
+#
+# v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True)
+# data2[(2,2)]=v[0]
+#
+# v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True, M=2)
+# data2[(3,2)]=v[0]
+# v,vv,variables = GNM(circuits=circuits[:3], variables=variables, H=H, silent=True)
+# data2[(3,3)]=v[0]
 
 print("\n\nFinished!\n\n")
 

@@ -49,7 +49,7 @@ def Corr(i,j, label=None):
     return tq.gates.QubitExcitation(target=[2*i,2*j,2*i+1,2*j+1], angle=(i,j,label))
 
 
-def make_excitation_generator_op(indices: typing.Iterable[typing.Tuple[int, int]], form: str = None,
+def make_excitation_generator_op(indices: typing.Iterable[typing.Tuple[int, int]], form: str = 'fermionic',
                                  remove_constant_term: bool = True, mol:QuantumChemistryBase = None) -> FermionOperator:
     """
     Notes
@@ -188,16 +188,16 @@ class BraKetQulacs:
 
 class BraKetOpenfermion:
 
-    def __init__(self, i, j, generator_dict, angle_dict, H_Fermion, circuit, overlap): #replace bra ket with generators
+    def __init__(self, i, j, generator_dict, angle_dict, H_Fermion, circuit, overlap):
 
 
         self.i = i
         self.j = j
-        self.bra = fqe.Wavefunction(param=[[circuit.n_qubits//2, 0, circuit.n_qubits//2]])
-        init = self.bra.get_coeff((4,0))
-        init[4][4] = 1 #todo ??????
-        self.bra.set_wfn(strategy="from_data", raw_data={(circuit.n_qubits//2,0):init})
-        self.ket = self.bra
+        self.num_qubits = circuit.n_qubits
+        self.bra = fqe.Wavefunction(param=[[self.num_qubits//2, 0, self.num_qubits//2]])#hcb seperate and then expand to non hcb ?
+
+
+        self.ket = fqe.Wavefunction(param=[[self.num_qubits//2, 0, self.num_qubits//2]])
         self.H = H_Fermion
         self.overlap = overlap
         self.generators_dict = generator_dict
@@ -206,6 +206,39 @@ class BraKetOpenfermion:
 
     def __call__(self, variables, *args, **kwargs):
 
+        if self.i == 0:
+            op_i = 1
+        elif self.i == 1:
+            op_i = 0
+        else:
+            op_i =  0
+
+        if self.j == 0:
+            op_j = 1
+        elif self.j == 1:
+            op_j = 0
+        else:
+            op_j = 0
+
+        # op_i=self.j
+        # op_j=self.i #todo fix this to first number of tuple
+
+
+
+        init = self.bra.get_coeff((self.num_qubits // 2, 0))
+        init[op_i][op_i] = 1  # todo ??????
+
+        self.bra.set_wfn(strategy="from_data", raw_data={(self.num_qubits // 2, 0): init})
+
+        init2 = self.ket.get_coeff((self.num_qubits // 2, 0))
+        init2[op_j][op_j] = 1  # todo ??????
+        self.ket.set_wfn(strategy="from_data", raw_data={(self.num_qubits // 2, 0): init2})
+        print("bra")
+        self.bra.print_wfn()
+        print("ket")
+        self.ket.print_wfn()
+
+
         filtered_out_non_angles = [key for key in variables if key in self.angle_dict]
 
         angles_bra = filtered_out_non_angles[self.i*4:(self.i+1)*4] # todo split them right
@@ -213,20 +246,19 @@ class BraKetOpenfermion:
 
 
         for variable_key in angles_bra:
-            self.bra = self.bra.time_evolve(variables[variable_key], self.angle_dict[variable_key])
+            self.bra = self.bra.time_evolve( -0.5* variables[variable_key], self.angle_dict[variable_key])
         for variable_key in angles_ket:
-            self.ket = self.ket.time_evolve(variables[variable_key], self.angle_dict[variable_key])
+            self.ket = self.ket.time_evolve(-0.5 *variables[variable_key], self.angle_dict[variable_key])
+
         if self.overlap:
-            h_op = fqe.get_hamiltonian_from_openfermion(FermionOperator(term=None,coefficient=1.0), norb=4)
+            result = fqe.vdot(self.bra, self.ket)
+            result = result.real
+
         else:
-            h_op = fqe.get_hamiltonian_from_openfermion(self.H, norb=4, conserve_number=True)
 
-
-
-        result = fqe.expectationValue(wfn=self.ket, ops=h_op, brawfn=self.bra)
-        result=result.real
-
-
+            h_op = fqe.get_hamiltonian_from_openfermion(self.H, norb=self.num_qubits//2)
+            result = fqe.expectationValue(wfn=self.ket, ops=h_op, brawfn=self.bra)
+            result=result.real
 
         return result
 
@@ -238,13 +270,13 @@ def gem_fast(circuits, H, H_Fermion, solver, variables, generator_dict, angle_di
     not differentiable
     """
     #solver="qulacs"
-    values = {list(variables.keys())[i]: 0 for i in range(len(variables))}
-    E = [tq.simulate(tq.ExpectationValue(H=H, U=U), variables=variables, silent=silent) for U in circuits]
+    variables = {list(variables.keys())[i]: 0 for i in range(len(variables))}
+    #E = [tq.simulate(tq.ExpectationValue(H=H, U=U), variables=variables, silent=silent) for U in circuits]
     SS = numpy.eye(len(circuits))
     EE = numpy.eye(len(circuits))
     for i in range(len(circuits)):
-        EE[i,i] = E[i]
-        for j in range(i+1,len(circuits)):
+
+        for j in range(i,len(circuits)):
             if solver == "qulacs":
                 f=BraKetQulacs(circuits[i], circuits[j], H)
                 ff=BraKetQulacs(circuits[i], circuits[j], H=tq.paulis.I())
@@ -254,9 +286,10 @@ def gem_fast(circuits, H, H_Fermion, solver, variables, generator_dict, angle_di
             else:
                 raise ValueError("Unknown solver {}".format(solver))
 
-            EE[i,j] = f(values)
+            EE[i,j] = f(variables)
             EE[j,i] = EE[i,j]
-            SS[i,j] = ff(values)
+
+            SS[i,j] = ff(variables)
             SS[j,i] = SS[i,j]
     print("SS")
     print(SS)
@@ -264,6 +297,7 @@ def gem_fast(circuits, H, H_Fermion, solver, variables, generator_dict, angle_di
     print(EE)
 
     v,vv = scipy.linalg.eigh(a=EE,b=SS)
+    print("done")
 
     return v,vv
 

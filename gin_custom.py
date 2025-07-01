@@ -30,7 +30,8 @@ def run_optimization(mol: QuantumChemistryBase, *args, **kwargs):
     # pre-optimize the circuits
 
 
-    energies = run_mcvbt_optimization(circuits=circuits, graphs=graphs, H=H, H_Fermion=H_fermion, solver="openfermion")
+    energies = run_mcvbt_optimization(circuits=circuits, graphs=graphs, H=H, H_Fermion=H_fermion, solver="openfermion",
+                                      mol=mol)
 
     for energy in energies:
         error = abs(energy-fci)
