@@ -58,7 +58,7 @@ def create_ferionic_generators(graphs:list, variables: dict, mol:QuantumChemistr
             angles_list.append(orbital_rot)
 
 
-        g += spa #+ orbital_rot
+        g += spa + orbital_rot
 
         #todo make delocalisation
 

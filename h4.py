@@ -67,13 +67,14 @@ angles_dict, gen_dict, generators = create_ferionic_generators(graphs=graphs, va
 data1[(1,0)]=best
 variables = {**variables_preopt}
 # compute static energies with the pre-optimized basis
-v,vv = gem_fast(circuits=circuits[:2],solver="qulacs", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
-_,_ = gem_fast(circuits=circuits[:2],solver="openfermion", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
-
+# v,vv = gem_fast(circuits=circuits[:2],solver="qulacs", variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
+v,vv = gem_fast(circuits=circuits[:2],solver=solver, variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
+print("efef")
 data1[(2,0)]=v[0]
 v,vv = gem_fast(circuits=circuits[:3],solver=solver, variables=variables, H=H, H_Fermion=H_fermion, generator_dict=gen_dict, angle_dict=angles_dict)
 data1[(3,0)]=v[0]
-exit()
+print("heir")
+print(variables)
 # relax circuit parameters
 v,vv,variables = GNM(circuits=circuits[:2], variables=variables, H=H, silent=True, M=1, H_Fermion=H_fermion,
                      generator_dict=gen_dict, angle_dict=angles_dict, solver=solver)

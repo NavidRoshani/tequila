@@ -6,6 +6,7 @@ import qulacs
 from openfermion import FermionOperator
 from sympy.physics.units import action
 
+
 import tequila as tq
 from tequila.hamiltonian import QubitHamiltonian
 from tequila import TequilaException, simulate
@@ -36,8 +37,8 @@ def Rot(idx, mol, label=None, s=1.e-4):
     In tequila version >= 1.8.4 this is equivalent to mol.UR
     """
     angle=tq.Variable((tuple(idx),label))
-    tmp = mol.make_excitation_gate(indices=[(2*idx[0],2*idx[1])], angle=(angle+s)*numpy.pi)
-    tmp+= mol.make_excitation_gate(indices=[(2*idx[0]+1,2*idx[1]+1)], angle=(angle+s)*numpy.pi)
+    tmp = mol.make_excitation_gate(indices=[(2*idx[0],2*idx[1])], angle=(-angle))
+    tmp+= mol.make_excitation_gate(indices=[(2*idx[0]+1,2*idx[1]+1)], angle=(-angle))
     return tmp
 
 
@@ -189,12 +190,14 @@ class BraKetQulacs:
 
 class BraKetOpenfermion:
 
-    def __init__(self, i, j, generator_dict, angle_dict, H_Fermion, circuit, overlap):
+    def __init__(self, i, j, generator_dict, angle_dict, H_Fermion, circuits, overlap):
 
 
         self.i = i
         self.j = j
-        self.num_qubits = circuit.n_qubits
+        self.num_qubits = circuits[0].n_qubits
+
+        self.length = len(circuits)
         self.bra = fqe.Wavefunction(param=[[self.num_qubits//2, 0, self.num_qubits//2]])#hcb seperate and then expand to non hcb ?
 
 
@@ -203,43 +206,49 @@ class BraKetOpenfermion:
         self.overlap = overlap
         self.generators_dict = generator_dict
         self.angle_dict = angle_dict
-        self.bin_dict = generate_op_binary_string(self.num_qubits//2,self.num_qubits//4)
+        self.bin_dict = generate_of_binary_dict(self.num_qubits // 2, self.num_qubits // 4)
 
 
     def __call__(self, variables, *args, **kwargs):
 
 
-
         filtered_out_non_angles = [key for key in variables if key in self.angle_dict]
 
-        angles_bra = filtered_out_non_angles[self.i*4:(self.i+1)*4] # todo split them universal, replace 4
-        angles_ket = filtered_out_non_angles[self.j*4:(self.j+1)*4]
+        dvd = int(len(self.angle_dict) / len(self.generators_dict))
+        angles_bra = filtered_out_non_angles[self.i*dvd:(self.i+1)*dvd] # todo split them universal, replace 4
+        print("asd",dvd, self.i, self.j, filtered_out_non_angles)
+        angles_ket = filtered_out_non_angles[self.j*dvd:(self.j+1)*dvd]
 
-        bra_tuples = filter_angles_to_edges(angles_bra)
-        ket_tuples = filter_angles_to_edges(angles_ket)
-
+        #figure out edges from variables to create intial state
+        bra_tuples = filter_angles_to_tuples(angles_bra)
         bra_string = binary_string_from_tuples(bra_tuples, self.num_qubits // 2)
-        ket_string = binary_string_from_tuples(ket_tuples, self.num_qubits // 2)
-
         op_i = self.bin_dict[bra_string]
+        #initialize bra state
+        init_bra = self.bra.get_coeff((self.num_qubits // 2, 0))
+        init_bra[op_i][op_i] = 1
+        self.bra.set_wfn(strategy="from_data", raw_data={(self.num_qubits // 2, 0): init_bra})
+
+        # figure out edges from variables to create intial state
+
+        ket_tuples = filter_angles_to_tuples(angles_ket)
+        ket_string = binary_string_from_tuples(ket_tuples, self.num_qubits // 2)
         op_j = self.bin_dict[ket_string]
+        #initialize ket state
+        init_ket = self.ket.get_coeff((self.num_qubits // 2, 0))
+        init_ket[op_j][op_j] = 1
 
-        init = self.bra.get_coeff((self.num_qubits // 2, 0))
-        init[op_i][op_i] = 1
-        self.bra.set_wfn(strategy="from_data", raw_data={(self.num_qubits // 2, 0): init})
+        self.ket.set_wfn(strategy="from_data", raw_data={(self.num_qubits // 2, 0): init_ket})
 
-        init2 = self.ket.get_coeff((self.num_qubits // 2, 0))
-        init2[op_j][op_j] = 1
-        self.ket.set_wfn(strategy="from_data", raw_data={(self.num_qubits // 2, 0): init2})
-        print("bra")
-        self.bra.print_wfn()
-        print("ket")
-        self.ket.print_wfn()
+        # print("bra")
+        # self.bra.print_wfn()
+        # print("ket")
+        # self.ket.print_wfn()
 
+        x = 0.5
         for variable_key in angles_bra:
-            self.bra = self.bra.time_evolve( -0.5* variables[variable_key], self.angle_dict[variable_key])
+            self.bra = self.bra.time_evolve(-x * variables[variable_key], self.angle_dict[variable_key])
         for variable_key in angles_ket:
-            self.ket = self.ket.time_evolve(-0.5 *variables[variable_key], self.angle_dict[variable_key])
+            self.ket = self.ket.time_evolve(-x * variables[variable_key], self.angle_dict[variable_key])
 
         if self.overlap:
             result = fqe.vdot(self.bra, self.ket)
@@ -261,7 +270,7 @@ def gem_fast(circuits, H, H_Fermion, solver, variables, generator_dict, angle_di
     not differentiable
     """
     #solver="qulacs"
-    variables = {list(variables.keys())[i]: 0 for i in range(len(variables))}
+    # variables = {list(variables.keys())[i]: 0 for i in range(len(variables))}
     #E = [tq.simulate(tq.ExpectationValue(H=H, U=U), variables=variables, silent=silent) for U in circuits]
     SS = numpy.eye(len(circuits))
     EE = numpy.eye(len(circuits))
@@ -272,8 +281,8 @@ def gem_fast(circuits, H, H_Fermion, solver, variables, generator_dict, angle_di
                 f=BraKetQulacs(circuits[i], circuits[j], H)
                 ff=BraKetQulacs(circuits[i], circuits[j], H=tq.paulis.I())
             elif solver == "openfermion":
-                f = BraKetOpenfermion(i, j, H_Fermion=H_Fermion, generator_dict=generator_dict,angle_dict=angle_dict, circuit=circuits[j], overlap=False)
-                ff = BraKetOpenfermion(i, j, H_Fermion=None, generator_dict=generator_dict,angle_dict=angle_dict, circuit=circuits[j], overlap=True)
+                f = BraKetOpenfermion(i, j, H_Fermion=H_Fermion, generator_dict=generator_dict,angle_dict=angle_dict, circuits=circuits, overlap=False)
+                ff = BraKetOpenfermion(i, j, H_Fermion=None, generator_dict=generator_dict,angle_dict=angle_dict, circuits=circuits, overlap=True)
             else:
                 raise ValueError("Unknown solver {}".format(solver))
 
@@ -282,13 +291,12 @@ def gem_fast(circuits, H, H_Fermion, solver, variables, generator_dict, angle_di
 
             SS[i,j] = ff(variables)
             SS[j,i] = SS[i,j]
-    print("SS")
-    print(SS)
-    print("EE")
-    print(EE)
+    print("EE = {}".format(EE))
+    print("SS = {}".format(SS))
+
 
     v,vv = scipy.linalg.eigh(a=EE,b=SS)
-    print("done")
+
 
     return v,vv
 
@@ -298,10 +306,10 @@ class BigExpVal:
     Convenience to initialize an expectation value as described in Eq.(7) of the paper with the Qulacs only structure
     """
 
-    def __init__(self, circuits, H, H_Fermion, coeffs,generator_dict,angle_dict, solver):
+    def __init__(self, circuits, H, H_Fermion, coeffs, generator_dict, angle_dict, solver):
         n = len(circuits)
         self.n = n
-        E = [tq.compile(tq.ExpectationValue(H=H, U=U)) for U in circuits]
+        # E = [tq.compile(tq.ExpectationValue(H=H, U=U)) for U in circuits]
         SS = []
         EE = []
         for i in range(n):
@@ -312,38 +320,46 @@ class BigExpVal:
                     xEE = BraKetQulacs(circuits[i], circuits[j], H=H)
                     xSS = BraKetQulacs(circuits[i], circuits[j], H=tq.paulis.I())
                 elif solver == "openfermion":
-                    xEE = BraKetOpenfermion(i, j, H_Fermion=H_Fermion, generator_dict=generator_dict,angle_dict=angle_dict, circuit=circuits[j], overlap=False)
-                    xSS = BraKetOpenfermion(i, j, H_Fermion=FermionOperator(''), generator_dict=generator_dict,angle_dict=angle_dict, circuit=circuits[j], overlap=True)
+                    xEE = BraKetOpenfermion(i, j, H_Fermion=H_Fermion, generator_dict=generator_dict,angle_dict=angle_dict, circuits=circuits, overlap=False)
+                    xSS = BraKetOpenfermion(i, j, H_Fermion=FermionOperator(''), generator_dict=generator_dict,angle_dict=angle_dict, circuits=circuits, overlap=True)
                 else:
                     raise ValueError("Unknown solver {}".format(solver))
                 tmp1.append(xEE)
                 tmp2.append(xSS)
-            tmp1.append(E[i])
-            tmp2.append(1.0)
+            # tmp1.append(E[i])
+            # tmp2.append(1.0)
             EE.append(tmp1)
             SS.append(tmp2)
         self.SS = SS
         self.EE = EE
         self.coeffs = coeffs
         variables={}
-        for U in circuits:
+        print(len(circuits))
+        for U in circuits: #todo fix this
             variables = {**variables, **{x:0.0 for x in U.extract_variables()}}
+            print(variables)
+        exit()
         for c in coeffs:
             variables = {**variables, **{x:0.0 for x in  c.extract_variables()}}
         self.variables=list(variables.keys())
-
+        print(len(variables))
+        print("end of init expal")
+        exit()
     def __call__(self, x, *args, **kwargs):
         n = self.n
+
         assert len(x) <= len(self.variables)
+
         values={self.variables[i]:x[i] for i in range(len(self.variables))}
         c = [self.coeffs[i](values) for i in range(n)]
         f = 0.0
         s = 0.0
         for i in range(n):
             f+=self.EE[i][i](values)*c[i]**2
+            print("diagonal done")
             s+=c[i]**2
             for j in range(i):
-               # print(values)
+               print(self.variables)
                # print(self.variables) todo figure out why variables and circuits dont fit together. varibales are static but circuits are getting looped over
                f+=2.0*self.EE[i][j](values)*c[i]*c[j]
                s+=2.0*self.SS[i][j](values)*c[i]*c[j]
@@ -363,6 +379,7 @@ def GNM(circuits, H, H_Fermion, variables,generator_dict, angle_dict, solver, si
     the G(M,N) method from the paper, N is implicitly given over the number of circuits
     """
     circs = [x for x in circuits]
+
     N = len(circs)
     if M is None:
         M = len(circs)
@@ -376,12 +393,15 @@ def GNM(circuits, H, H_Fermion, variables,generator_dict, angle_dict, solver, si
     vkeys = []
     for U in circs:
         vkeys+=U.extract_variables()
-    
-    variables = {**{k:0.0 for k in vkeys if k not in variables}, **variables}
 
-    v,vv = gem_fast(circuits=circs,H=H, H_Fermion=H_Fermion,variables=variables,generator_dict=generator_dict, angle_dict=angle_dict, solver=solver)
+
+    variables = {**{k:0.0 for k in vkeys if k not in variables}, **variables}
+    print(len(variables))
+    #todo doesn't pass down fixed variables to openfermion because qulacs doesn't need that
+    v,vv = gem_fast(circuits=circs,H=H, H_Fermion=H_Fermion,variables=variables,generator_dict=generator_dict, angle_dict=angle_dict, solver=solver) #variables not given properly
     
     x0 = {k:variables[k] for k in vkeys}
+
 
     coeffs = []
     for i in range(len(circs)):
@@ -399,10 +419,11 @@ def GNM(circuits, H, H_Fermion, variables,generator_dict, angle_dict, solver, si
     f = BigExpVal(circuits=circs, H=H,H_Fermion=H_Fermion, coeffs=coeffs, solver=solver, generator_dict=generator_dict,angle_dict=angle_dict)
 
     for i in range(maxiter):
+        print("iteration",i)
         result = scipy.optimize.minimize(f, x0=list(x0.values()), jac="2-point",
                                          method="bfgs", options={"finite_diff_rel_step":1.e-5, "disp":True},
                                          callback=callback)
-
+        exit()
         x0 = {vkeys[i]:result.x[i] for i in range(len(result.x))}
         v,vv = gem_fast(circuits=circs,H=H,H_Fermion=H_Fermion,variables=x0,generator_dict=generator_dict,angle_dict=angle_dict, solver=solver)
         for i in range(len(coeffs)):
@@ -426,8 +447,6 @@ def make_fermionic_Ham(mol:QuantumChemistryBase, *args, **kwargs) -> QubitHamilt
     """
     Parameters
     ----------
-    occupied_indices: will be auto-assigned according to specified active space. Can be overridden by passing specific lists (same as in open fermion)
-    active_indices: will be auto-assigned according to specified active space. Can be overridden by passing specific lists (same as in open fermion)
 
     Returns
     -------
@@ -446,7 +465,20 @@ def make_fermionic_Ham(mol:QuantumChemistryBase, *args, **kwargs) -> QubitHamilt
     return fop
 
 
-def generate_op_binary_string(n_orb, n_e):
+def generate_of_binary_dict(n_orb: int, n_e: int) -> dict:
+
+    """
+    create a dictionary of all possibilities of a binary string of length n_orb with n_e number of 1s as a key and
+    the integer value of the binary string as the value
+    Parameters
+    ----------
+    n_orb: number of orbitals
+    n_e: number of electrons
+
+    Returns
+    -------
+    Dictionary with the key being the binary possibilities and the value being the integer value of the binary string
+    """
     result = {}
     for index, positions in enumerate(combinations(range(n_orb), n_e)):
         s = ['0'] * n_orb
@@ -457,11 +489,11 @@ def generate_op_binary_string(n_orb, n_e):
     return result
 
 
-def binary_string_from_tuples(tuples, n):
+def binary_string_from_tuples(tuples, n: int):
     """
     Given a list of 2-element tuples and a fixed binary string length n,
     create a binary string of length n where positions corresponding to the
-    first element of each tuple are set to '1', then reverse the string.
+    first element of each tuple are set to '1'
     """
     # Initialize a list of '0's
     binary = ['0'] * n
@@ -472,24 +504,46 @@ def binary_string_from_tuples(tuples, n):
         if 0 <= i < n:
             binary[i] = '1'
 
-    # Reverse the binary string and return it
     return ''.join(binary[:])
 
 
-def filter_angles_to_edges(objects):
+def filter_angles_to_tuples(objects):
+    """
+    function to get the tuples from the variables
+
+    Returns
+    -------
+    tuples for the corresponding edges int eh SPA circuit
+    """
     result = []
+
     for obj in objects:
         s = str(obj)
         try:
             # Parse string to Python tuple/list structure
             parsed = ast.literal_eval(s)
-
             # Check if parsed is a tuple with second element 'D'
             if isinstance(parsed, tuple) and len(parsed) > 1 and parsed[1] == 'D':
+
                 # Append the first element of the tuple
                 result.append(parsed[0])
         except (ValueError, SyntaxError):
             # If string cannot be parsed, just ignore this object
             pass
+
+        for obj in objects:
+            s = str(obj)
+
+            try:
+                # Parse string to Python tuple/list structure
+                parsed = ast.literal_eval(s)
+                # Check if parsed is a tuple with second element 'D'
+                if isinstance(parsed, tuple) and len(parsed) > 1:
+                    # Append the first element of the tuple
+                    result.append(parsed[0])
+            except (ValueError, SyntaxError):
+                # If string cannot be parsed, just ignore this object
+                pass
+
     return result
 
