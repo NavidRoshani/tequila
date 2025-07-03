@@ -6,7 +6,7 @@ import pkg_resources
 from pkg_resources import DistributionNotFound
 
 from tequila.objective import Objective, Variable, assign_variable, format_variable_dictionary, QTensor
-from tequila.simulators.simulator_MQP import BackendCircuitAQT, BackendExpectationValueAQT
+
 from tequila.utils.exceptions import TequilaException, TequilaWarning
 from tequila.simulators.simulator_base import BackendCircuit, BackendExpectationValue
 from tequila.circuit.noise import NoiseModel
@@ -48,6 +48,7 @@ except ImportError:
 
 HAS_AQT = True
 try:
+    from tequila.simulators.simulator_MQP import BackendCircuitAQT, BackendExpectationValueAQT
     from qiskit_aqt_provider import AQTProvider
     from mqp.qiskit_provider import MQPProvider
     INSTALLED_SIMULATORS["aqt"] = BackendTypes(BackendCircuitAQT, BackendExpectationValueAQT)
